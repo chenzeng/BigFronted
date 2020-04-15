@@ -10,6 +10,10 @@
 
     [prototype](https://github.com/chenzeng/BigFronted/blob/master/image/prototype.png)
 
+    [JavaScript深入之从原型到原型链](https://github.com/mqyqingfeng/Blog/issues/2)
+    
+    
+    
 2. ### 作用域 ###
     作用域是指程序源代码中定义变量的区域，函数的作用域基于函数创建的位置
 
