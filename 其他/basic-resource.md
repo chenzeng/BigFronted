@@ -195,3 +195,145 @@ box-sizing
 - `indexOf / lastIndexOf(value, fromIndex)`: 查找数组项，返回对应的下标
 - `reduce / reduceRight(fn(prev, cur)， defaultPrev)`: 两两执行，prev 为上次化简函数的`return`值，cur 为当前值(从第二项开始)
 
+## 浏览器
+
+#### 跨标签页通讯
+
+不同标签页间的通讯，本质原理就是去运用一些可以 **共享的中间介质**，因此比较常用的有以下方法:
+
+- 通过父页面`window.open()`和子页面`postMessage`
+  - 异步下，通过 `window.open('about: blank')` 和 `tab.location.href = '*'`
+- 设置同域下共享的`localStorage`与监听`window.onstorage`
+  - 重复写入相同的值无法触发
+  - 会受到浏览器隐身模式等的限制
+- 设置共享`cookie`与不断轮询脏检查(`setInterval`)
+- 借助服务端或者中间层实现
+
+#### 从输入url到展示的过程
+
+1. DNS解析
+2. TCP三次握手
+3. 发送请求，分析url，设置请求报文（头，主体）
+4. 服务器返回请求文件（html）
+5. 浏览器渲染
+   - HTML parser--> DOM Tree  (标记化算法，进行元素状态的标记；dom树构建)
+   - CSS parser --> Style Tree  (解析css代码，生成样式树)
+   - attachment-->Render Tree (结合dom树和style树，生成渲染树)
+   - laylout布局 ，GPU painting像素绘制页面
+
+#### 内存泄露
+
+- 意外的**全局变量**: 无法被回收
+- **定时器**: 未被正确关闭，导致所引用的外部变量无法被释放
+- **事件监听**: 没有正确销毁 (低版本浏览器可能出现)
+- **闭包**: 会导致父级中的变量无法被释放
+- **dom 引用**: dom 元素被删除时，内存中的引用未被正确清空
+
+可用 chrome 中的 timeline 进行内存标记，可视化查看内存的变化情况，找出异常点。
+
+## 算法
+
+#### 基础排序算法
+
+- 冒泡排序: 两两比较
+
+```
+	function bubleSort(arr) {
+	    var len = arr.length;
+	    for (let outer = len ; outer >= 2; outer--) {
+	        for(let inner = 0; inner <=outer - 1; inner++) {
+	            if(arr[inner] > arr[inner + 1]) {
+	                [arr[inner],arr[inner+1]] = [arr[inner+1],arr[inner]]
+	            }
+	        }
+	    }
+	    return arr;
+	}
+```
+
+- 选择排序: 遍历自身以后的元素，最小的元素跟自己调换位置
+
+```
+function selectSort(arr) {
+    var len = arr.length;
+    for(let i = 0 ;i < len - 1; i++) {
+        for(let j = i ; j<len; j++) {
+            if(arr[j] < arr[i]) {
+                [arr[i],arr[j]] = [arr[j],arr[i]];
+            }
+        }
+    }
+    return arr
+}
+```
+
+- 插入排序: 即将元素插入到已排序好的数组中
+
+```
+function insertSort(arr) {
+    for(let i = 1; i < arr.length; i++) {  //外循环从1开始，默认arr[0]是有序段
+        for(let j = i; j > 0; j--) {  //j = i,将arr[j]依次插入有序段中
+            if(arr[j] < arr[j-1]) {
+                [arr[j],arr[j-1]] = [arr[j-1],arr[j]];
+            } else {
+                break;
+            }
+        }
+    }
+    return arr;
+}
+```
+
+
+
+#### 高级算法排序
+
+- 快速排序
+  - 选择基准值(base)，原数组长度减一(基准值)，使用 splice
+  - 循环原数组，小的放左边(left数组)，大的放右边(right数组);
+  - concat(left, base, right)
+  - 递归继续排序 left 与 right
+
+```
+function quickSort(arr) {
+    if(arr.length <= 1) {
+        return arr;  //递归出口
+    }
+    var left = [],
+        right = [],
+        current = arr.splice(0,1); 
+    for(let i = 0; i < arr.length; i++) {
+        if(arr[i] < current) {
+            left.push(arr[i])  //放在左边
+        } else {
+            right.push(arr[i]) //放在右边
+        }
+    }
+    return quickSort(left).concat(current,quickSort(right));
+}
+```
+
+- 希尔排序：不定步数的插入排序，插入排序
+- 口诀: 插冒归基稳定，快选堆希不稳定
+
+![img](https://user-gold-cdn.xitu.io/2019/2/14/168e9d8524a2b947?imageslim)
+
+稳定性： 同大小情况下是否可能会被交换位置, 虚拟dom的diff，不稳定性会导致重新渲染；
+
+
+
+#### 递归运用(斐波那契数列)： 爬楼梯问题
+
+初始在第一级，到第一级有1种方法(s(1) = 1)，到第二级也只有一种方法(s(2) = 1)， 第三级(s(3) = s(1) + s(2))
+
+```
+function cStairs(n) {
+    if(n === 1 || n === 2) {
+        return 1;
+    } else {
+        return cStairs(n-1) + cStairs(n-2)
+    }
+}
+```
+
+
